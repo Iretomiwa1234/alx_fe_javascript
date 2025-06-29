@@ -1,9 +1,19 @@
-// Initial set of quotes
-let quotes = [
-  { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
-  { text: "Life is what happens when you're busy making other plans.", category: "Life" },
-  { text: "Stay hungry, stay foolish.", category: "Inspiration" }
-];
+// Load from localStorage or use default
+let quotes = [];
+function loadQuotes() {
+  const storedQuotes = localStorage.getItem('quotes');
+  quotes = storedQuotes ? JSON.parse(storedQuotes) : [
+    { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
+    { text: "Life is what happens when you're busy making other plans.", category: "Life" },
+    { text: "Stay hungry, stay foolish.", category: "Inspiration" }
+  ];
+}
+
+// Save to localStorage
+function saveQuotes() {
+  localStorage.setItem('quotes', JSON.stringify(quotes));
+  populateCategories(); // refresh category dropdown
+}
 
 // Populate the category dropdown
 function populateCategories() {
@@ -19,20 +29,24 @@ function populateCategories() {
   });
 }
 
-// Display a random quote based on selected category
+// Show a random quote
 function showRandomQuote() {
   const selectedCategory = document.getElementById('categorySelect').value;
   const filteredQuotes = selectedCategory === 'all'
     ? quotes
     : quotes.filter(q => q.category === selectedCategory);
 
+  const quoteDisplay = document.getElementById('quoteDisplay');
   if (filteredQuotes.length === 0) {
-    document.getElementById('quoteDisplay').textContent = 'No quotes available in this category.';
+    quoteDisplay.textContent = 'No quotes available in this category.';
     return;
   }
 
   const randomQuote = filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)];
-  document.getElementById('quoteDisplay').textContent = `"${randomQuote.text}" — ${randomQuote.category}`;
+  quoteDisplay.textContent = `"${randomQuote.text}" — ${randomQuote.category}`;
+
+  // Save last viewed quote to sessionStorage
+  sessionStorage.setItem('lastViewedQuote', JSON.stringify(randomQuote));
 }
 
 // Add a new quote
@@ -46,10 +60,19 @@ function addQuote() {
     quotes.push({ text, category });
     textInput.value = '';
     categoryInput.value = '';
-    populateCategories();
+    saveQuotes();
     alert('Quote added successfully!');
   } else {
     alert('Please fill in both quote and category.');
+  }
+}
+
+// Optional: Load last viewed quote from session
+function restoreLastViewedQuote() {
+  const lastViewed = sessionStorage.getItem('lastViewedQuote');
+  if (lastViewed) {
+    const q = JSON.parse(lastViewed);
+    document.getElementById('quoteDisplay').textContent = `"${q.text}" — ${q.category}`;
   }
 }
 
@@ -57,5 +80,7 @@ function addQuote() {
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 document.getElementById('addQuoteBtn').addEventListener('click', addQuote);
 
-// Initial load
+// Initialize app
+loadQuotes();
 populateCategories();
+restoreLastViewedQuote();

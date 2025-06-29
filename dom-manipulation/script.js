@@ -126,6 +126,7 @@ function importFromJsonFile(event) {
   };
   reader.readAsText(file);
 }
+/* Removed invalid ellipsis and duplicate code */
 
 // Event Listeners
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
